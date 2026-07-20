@@ -5,8 +5,9 @@ import { createAuthClient } from "better-auth/react";
 // Using 'any' for the session user is a temporary workaround to unblock the build
 // while maintaining type safety in the components using this wrapper.
 
-// If NEXT_PUBLIC_API_URL is set (local dev), use it. Otherwise, use empty string for relative proxying.
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "";
+// Keep browser requests on this origin. Next.js rewrites `/api/*` to the backend,
+// which avoids CORS and lets the browser persist the session cookie locally.
+const baseURL = "";
 
 const authClientRaw = createAuthClient({
   baseURL,

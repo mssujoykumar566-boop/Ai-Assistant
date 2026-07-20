@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// If NEXT_PUBLIC_API_URL is set (local dev), use it. Otherwise, use empty string for relative proxying.
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "";
+// Use the Next.js `/api/*` rewrite instead of making a cross-origin browser request.
+const baseURL = "";
 
 export const api = axios.create({
   baseURL,
