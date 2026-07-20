@@ -59,7 +59,7 @@ export default function LoginPage() {
         <button onClick={handleDemoLogin} className="w-full p-3 bg-violet-100 text-violet-700 rounded-lg hover:bg-violet-200 transition">Use Demo Account</button>
 
         <p className="mt-6 text-center text-gray-600">
-          Dont have an account? <Link href="/register" className="text-indigo-600 font-bold hover:underline">Register</Link>
+          Don't have an account? <Link href="/register" className="text-indigo-600 font-bold hover:underline">Register</Link>
         </p>
       </div>
     </div>
