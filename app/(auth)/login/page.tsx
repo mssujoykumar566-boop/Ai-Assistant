@@ -17,10 +17,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn.email({ email, password });
-      router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials");
+      const result = await signIn.email({ email, password });
+
+      if (result.error) {
+        setError(result.error.message || "Invalid credentials");
+        return;
+      }
+
+      router.replace("/dashboard");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to log in. Please try again.");
     } finally {
       setLoading(false);
     }
