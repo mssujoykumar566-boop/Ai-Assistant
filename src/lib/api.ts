@@ -9,5 +9,14 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+  const token =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("skillpath_auth_token")
+      : null;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
   return config;
 });
