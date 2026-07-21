@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback, Suspense } from "react";
+import { isCancel } from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
@@ -27,20 +28,31 @@ function ChatContent() {
     }
   }, [searchParams]);
 
-  const fetchChatList = useCallback(async () => {
+  const fetchChatList = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await api.get("/api/chat");
+      const response = await api.get("/api/chat", { signal });
       const chats = Array.isArray(response.data.chats) ? response.data.chats : [];
       setChatList(chats);
     } catch (error) {
+      if (isCancel(error)) return;
+
       console.error("Error fetching chat list", error);
       setChatList([]);
     }
   }, []);
 
   useEffect(() => {
-    if (!isPending && !session) router.push("/login");
-    else if (session) fetchChatList();
+    if (!isPending && !session) {
+      router.replace("/login");
+      return;
+    }
+
+    if (!session) return;
+
+    const controller = new AbortController();
+    void fetchChatList(controller.signal);
+
+    return () => controller.abort();
   }, [session, isPending, router, fetchChatList]);
 
   const handleNewChat = () => {

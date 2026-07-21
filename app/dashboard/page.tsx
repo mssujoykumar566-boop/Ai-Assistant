@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { isCancel } from "axios";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { api } from "@/lib/api";
@@ -13,20 +14,31 @@ export default function DashboardPage() {
   const router = useRouter();
   const [recentChats, setRecentChats] = useState<Chat[]>([]);
 
-  const fetchRecentChats = useCallback(async () => {
+  const fetchRecentChats = useCallback(async (signal?: AbortSignal) => {
     try {
-      const response = await api.get("/api/chat");
+      const response = await api.get("/api/chat", { signal });
       const chats = Array.isArray(response.data.chats) ? response.data.chats : [];
       setRecentChats(chats.slice(0, 5)); // Show 5 most recent
     } catch (error) {
+      if (isCancel(error)) return;
+
       console.error("Error fetching chats", error);
       setRecentChats([]);
     }
   }, []);
 
   useEffect(() => {
-    if (!isPending && !session) router.push("/login");
-    else if (session) fetchRecentChats();
+    if (!isPending && !session) {
+      router.replace("/login");
+      return;
+    }
+
+    if (!session) return;
+
+    const controller = new AbortController();
+    void fetchRecentChats(controller.signal);
+
+    return () => controller.abort();
   }, [session, isPending, router, fetchRecentChats]);
 
   if (isPending) return <div>Loading...</div>;

@@ -1,12 +1,33 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Menu, X, MessageSquare, LayoutDashboard, LogOut } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 
 export default function Navbar() {
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      const result = await signOut();
+
+      if (!result.error) {
+        setIsOpen(false);
+        router.replace("/login");
+        router.refresh();
+      }
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-indigo-100">
@@ -36,7 +57,7 @@ export default function Navbar() {
                 <Link href="/chat" className="text-gray-600 hover:text-indigo-600 flex items-center gap-1">
                   <MessageSquare size={18} /> Chat
                 </Link>
-                <button onClick={() => signOut()} className="text-gray-600 hover:text-indigo-600 flex items-center gap-1">
+                <button onClick={handleSignOut} disabled={isLoggingOut} className="text-gray-600 hover:text-indigo-600 flex items-center gap-1 disabled:opacity-50">
                   <LogOut size={18} /> Logout
                 </button>
               </>
@@ -72,7 +93,7 @@ export default function Navbar() {
                 </>
               )}
               <Link href="/chat" className="block text-gray-600">Chat</Link>
-              <button onClick={() => signOut()} className="block text-gray-600">Logout</button>
+              <button onClick={handleSignOut} disabled={isLoggingOut} className="block text-gray-600 disabled:opacity-50">Logout</button>
             </>
           ) : (
             <>
