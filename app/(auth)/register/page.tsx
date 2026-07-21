@@ -23,10 +23,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await signUp.email({ email, password, name });
+      const result = await signUp.email({ email, password, name });
+
+      if (result.error) {
+        setError(result.error.message || "Registration failed");
+        return;
+      }
+
       router.push("/login");
-    } catch (err: any) {
-      setError(err.message || "Registration failed");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unable to register. Please try again.");
     } finally {
       setLoading(false);
     }
